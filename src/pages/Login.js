@@ -1,102 +1,85 @@
 import React from 'react';
 import { connect } from 'react-redux';
-
 import PropTypes from 'prop-types';
-
-import '../App.css';
-import { loginEmail } from '../actions';
+import { userAction } from '../actions';
 
 class Login extends React.Component {
   constructor() {
     super();
-
     this.state = {
-      disabled: true,
       email: '',
-      password: '',
+      senha: '',
+      verify: true,
     };
-
-    this.handleClick = this.handleClick.bind(this);
-    this.handleEmail = this.handleEmail.bind(this);
-    this.handlePassword = this.handlePassword.bind(this);
+    this.uptadeState = this.uptadeState.bind(this);
+    this.submit = this.submit.bind(this);
+    this.verify = this.verify.bind(this);
   }
 
-  ValidarEmail(email) {
-    const valid = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-    return valid.test(email);
+  uptadeState(event) {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+    this.verify();
   }
 
-  handleEmail({ target }) {
-    this.setState({
-      email: target.value,
-    });
+  checkEmail(email) {
+    const check = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+    return check.test(email);
   }
 
-  handlePassword({ target }) {
-    this.setState({
-      password: target.value,
-    });
-    const { password, email } = this.state;
-    const NUMBER_FIVE = 5;
-    if (password.length >= NUMBER_FIVE && this.ValidarEmail(email)) {
-      this.setState({
-        disabled: false,
-      });
-    }
+  verify() {
+    const { email, senha } = this.state;
+    const min = 5;
+    if (this.checkEmail(email) && senha.length >= min) {
+      this.setState({ verify: false });
+    } else { this.setState({ verify: true }); }
   }
 
-  // https://irias.com.br/blog/como-validar-email-e-senha-em-javascript/
-
-  handleClick() {
-    const { history, dispatchEmail } = this.props;
+  submit() {
     const { email } = this.state;
-    dispatchEmail(email);
+    const { history, setEmail } = this.props;
+    setEmail(email);
     history.push('/carteira');
   }
 
   render() {
-    const { disabled, email, password } = this.state;
+    const { email, senha, verify } = this.state;
     return (
-      <section className="login-page">
+      <div>
         <form>
           <input
             type="email"
             data-testid="email-input"
-            placeholder="Digite seu email"
+            onChange={ this.uptadeState }
             value={ email }
-            onChange={ this.handleEmail }
             name="email"
           />
           <input
-            type="text"
+            type="password"
             data-testid="password-input"
-            name="password"
-            placeholder="Digite sua senha"
-            value={ password }
-            onChange={ this.handlePassword }
+            onChange={ this.uptadeState }
+            value={ senha }
+            name="senha"
           />
           <button
             type="button"
-            disabled={ disabled }
-            onClick={ this.handleClick }
+            disabled={ verify }
+            onClick={ this.submit }
           >
             Entrar
           </button>
         </form>
-      </section>
+      </div>
     );
   }
 }
-
-Login.propTypes = {
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-  dispatchEmail: PropTypes.func,
-}.isRequired;
-
 const mapDispatchToProps = (dispatch) => ({
-  dispatchEmail: (email) => dispatch(loginEmail(email)),
+  setEmail: (email) => dispatch(userAction(email)),
 });
 
 export default connect(null, mapDispatchToProps)(Login);
+
+Login.propTypes = {
+  history: PropTypes.shape().isRequired,
+  setEmail: PropTypes.func.isRequired,
+};
