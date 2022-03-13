@@ -1,86 +1,78 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { userAction } from '../actions';
+import propTypes from 'prop-types';
+import createUser from '../redux/actions/createUser';
 
 class Login extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      email: '',
-      senha: '',
-      verify: true,
-    };
-    this.uptadeState = this.uptadeState.bind(this);
-    this.submit = this.submit.bind(this);
-    this.verify = this.verify.bind(this);
-  }
+  state = {
+    email: '',
+    password: '',
+    buttonIsDisabled: true,
+  };
 
-  uptadeState(event) {
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
-    this.verify();
-  }
+  handleChange = ({ target }) => {
+    this.setState(() => ({
+      [target.name]: target.value,
+    }), () => this.validateForm());
+  };
 
-  // https://cursos.alura.com.br/forum/topico-como-validar-email-e-senha-em-javascript-80469
-  checkEmail(email) {
-    const check = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-    return check.test(email);
-  }
+  validateForm = () => {
+    // https://www.horadecodar.com.br/2020/09/07/expressao-regular-para-validar-e-mail-javascript-regex/
+    const validateEmail = /\S+@\S+\.\S+/;
+    const MIN_LENGTH = 6;
+    const { email, password } = this.state;
 
-  verify() {
-    const { email, senha } = this.state;
-    const min = 5;
-    if (this.checkEmail(email) && senha.length >= min) {
-      this.setState({ verify: false });
-    } else { this.setState({ verify: true }); }
-  }
+    const isValid = validateEmail.test(email) && password.length >= MIN_LENGTH;
 
-  submit() {
+    this.setState({
+      buttonIsDisabled: !isValid,
+    });
+  };
+
+  handleSubmit = () => {
     const { email } = this.state;
-    const { history, setEmail } = this.props;
-    setEmail(email);
+    const { setUser, history } = this.props;
+    setUser(email);
     history.push('/carteira');
-  }
+  };
 
   render() {
-    const { email, senha, verify } = this.state;
+    const { email, password, buttonIsDisabled } = this.state;
     return (
-      <div>
-        <form>
-          <input
-            type="email"
-            data-testid="email-input"
-            onChange={ this.uptadeState }
-            value={ email }
-            name="email"
-          />
-          <input
-            type="password"
-            data-testid="password-input"
-            onChange={ this.uptadeState }
-            value={ senha }
-            name="senha"
-          />
-          <button
-            type="button"
-            disabled={ verify }
-            onClick={ this.submit }
-          >
-            Entrar
-          </button>
-        </form>
-      </div>
+      <form>
+        <input
+          onChange={ this.handleChange }
+          value={ email }
+          name="email"
+          type="email"
+          data-testid="email-input"
+        />
+        <input
+          onChange={ this.handleChange }
+          value={ password }
+          name="password"
+          type="password"
+          data-testid="password-input"
+        />
+        <button
+          disabled={ buttonIsDisabled }
+          type="button"
+          onClick={ this.handleSubmit }
+        >
+          Entrar
+        </button>
+      </form>
     );
   }
 }
 const mapDispatchToProps = (dispatch) => ({
-  setEmail: (email) => dispatch(userAction(email)),
+  setUser: (email) => dispatch(createUser(email)),
 });
 
-export default connect(null, mapDispatchToProps)(Login);
-
 Login.propTypes = {
-  history: PropTypes.shape().isRequired,
-  setEmail: PropTypes.func.isRequired,
+  setUser: propTypes.func.isRequired,
+  history: propTypes.shape({
+    push: propTypes.func.isRequired,
+  }).isRequired,
 };
+export default connect(null, mapDispatchToProps)(Login);

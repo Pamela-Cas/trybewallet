@@ -1,15 +1,15 @@
 import React from 'react';
-import { Switch, Route } from 'react-router';
+import { Route, Switch } from 'react-router-dom';
 import Login from './pages/Login';
 import Wallet from './pages/Wallet';
 
-export default function App() {
+function App() {
   return (
-    <div>
-      <Switch>
-        <Route path="/carteira" component={ Wallet } />
-        <Route exact path="/" component={ Login } />
-      </Switch>
-    </div>
+    <Switch>
+      <Route exact path="/" component={ Login } />
+      <Route path="/carteira" component={ Wallet } />
+    </Switch>
   );
 }
+
+export default App;

@@ -7,11 +7,6 @@
   pointer-events: none;
 }
 
-.header-table {
-  display: flex;
-  justify-content: space-between;
-}
-
 @media ( prefers-reduced-motion : no-preference ) {
 
   .App-logo {
